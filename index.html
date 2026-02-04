@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Valentine?</title>
+  <meta charset="utf-8" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 40px;
+      background: #000;
+      overflow-x: hidden;
+    }
+
+    body::before{
+      content:"";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath fill='%23ff69b4' fill-opacity='0.12' d='M40 64s-19-11.7-27.2-23.2C6.2 30.5 10.8 18 23 18c6.3 0 10.7 3.6 13 7.2C38.3 21.6 42.7 18 49 18c12.2 0 16.8 12.5 10.2 22.8C59 52.3 40 64 40 64z'/%3E%3C/svg%3E");
+      background-size: 90px 90px;
+      background-repeat: repeat;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding-bottom: 120px;
+      color: #ff69b4;
+    }
+
+    h1 {
+      font-size: 56px;
+      margin: 10px 0 5px;
+      text-shadow: 0 0 14px rgba(255,105,180,0.45);
+    }
+
+    .hero-images {
+      position: relative;
+      width: 100%;
+      height: 260px;
+    }
+
+    .hero-images img,
+    .bottom-images img {
+      position: absolute;
+      width: 240px;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 8px 18px rgba(255,255,255,0.15);
+      transition: opacity 0.25s;
+    }
+
+    #img1 { top: 0; left: 6%; }
+    #img2 { top: 0; right: 6%; }
+
+    .bottom-images {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      pointer-events: none;
+    }
+
+    #img4 { bottom: 40px; left: 6%; }
+    #img5 { bottom: 40px; right: 6%; }
+
+    #img3 {
+      display: none;
+      width: 320px;
+      margin-top: 10px;
+    }
+
+    .pop-in { animation: pop 300ms ease-out; }
+
+    @keyframes pop {
+      from { transform: scale(0.6); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .buttons {
+      display: flex;
+      gap: 20px;
+      margin-top: 6px;
+    }
+
+    button {
+      font-size: 20px;
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+      transition: transform 0.2s, opacity 0.2s;
+      color: #000;
+      background: #fff;
+      border: none;
+      border-radius: 8px;
+    }
+
+    button:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    #message {
+      min-height: 36px;
+      font-size: 18px;
+      margin-top: 6px;
+      transition: font-size 0.2s;
+      text-shadow: 0 0 10px rgba(255,105,180,0.35);
+    }
+
+    .hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="hero-images">
+    <img id="img1" src="66b3e9a09291ddecfb8e714b_60.png">
+    <img id="img2" src="66b3e66d2a805640c8a50154_72.png">
+  </div>
+
+  <h1>Will you be my Valentine? 💘</h1>
+
+  <img id="img3" src="66b3ec484aab267bf1610629_06.png">
+
+  <div class="buttons">
+    <button id="yesBtn" onclick="yesClicked()">Yes</button>
+    <button id="noBtn" onclick="noClicked()">No</button>
+  </div>
+
+  <p id="message"></p>
+
+  <div class="bottom-images">
+    <img id="img4" src="66b3ec3d99123fa294ad574c_05.png">
+    <img id="img5" src="66b3ec0264370ddcfd1be8e0_11.png">
+  </div>
+
+</div>
+
+<script>
+  let stage = 0;
+  let yesScale = 1;
+  let textSize = 18;
+  let locked = false;
+
+  const imageSequence = [
+    "66b3ec484aab267bf1610629_06.png",
+    "66b3ec144fabc11a79ba36a5_09.png",
+    "66e99db1f5c63f46f7415051_020.png",
+    "66b3eb957f22ff6be5942c1a_19.png",
+    "66b3e615337065d6841614aa_78.png"
+  ];
+  let imageIndex = 0;
+
+  /* ORIGINAL strong initial scroll */
+  function initialScroll() {
+    document.getElementById("message")
+      .scrollIntoView({ behavior: "smooth", block: "nearest" });
+    window.scrollBy({ top: 160, behavior: "smooth" });
+  }
+
+  /* Growth-based scroll only when hitting bottom */
+  function preventBottomCollision() {
+    const msg = document.getElementById("message");
+    const rect = msg.getBoundingClientRect();
+
+    if (rect.bottom > window.innerHeight) {
+      const overflow = rect.bottom - window.innerHeight;
+      window.scrollBy({ top: overflow + 8, behavior: "smooth" });
+    }
+  }
+
+  function disableBothButtons() {
+    document.getElementById("yesBtn").disabled = true;
+    document.getElementById("noBtn").disabled = true;
+    locked = true;
+  }
+
+  function updateImage() {
+    if (imageIndex < imageSequence.length - 1) {
+      imageIndex++;
+      const img3 = document.getElementById("img3");
+      img3.src = imageSequence[imageIndex];
+      img3.classList.remove("pop-in");
+      void img3.offsetWidth;
+      img3.classList.add("pop-in");
+    }
+  }
+
+  function yesClicked() {
+    if (locked) return;
+
+    if (stage === 0) {
+      document.getElementById("message").innerText = "YOUPIE 💕";
+      return;
+    }
+
+    document.getElementById("message").innerText = "Are u sure 🤨";
+    textSize += 6;
+    yesScale = Math.max(0.22, yesScale - 0.12);
+
+    document.getElementById("message").style.fontSize = textSize + "px";
+    document.getElementById("yesBtn").style.transform = `scale(${yesScale})`;
+
+    updateImage();
+    preventBottomCollision();
+  }
+
+  function noClicked() {
+    if (locked) return;
+
+    if (stage === 0) {
+      stage = 1;
+      document.getElementById("message").innerText = "Are u sure 🤨";
+
+      document.getElementById("img1").classList.add("hidden");
+      document.getElementById("img2").classList.add("hidden");
+      document.getElementById("img4").classList.add("hidden");
+      document.getElementById("img5").classList.add("hidden");
+
+      const img3 = document.getElementById("img3");
+      img3.style.display = "block";
+      img3.classList.add("pop-in");
+
+      initialScroll();   // ← BACK, exactly like before
+      return;
+    }
+
+    document.getElementById("message").innerText = "YOUPIE 💕";
+    disableBothButtons();
+  }
+</script>
+
+</body>
+</html>
