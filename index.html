@@ -162,21 +162,26 @@
   ];
   let imageIndex = 0;
 
-  /* ORIGINAL strong initial scroll */
+  /* 🔥 THIS IS THE NEW PART 🔥 */
+  function sendAnswer(answer) {
+    fetch("/api/answer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ answer })
+    });
+  }
+
   function initialScroll() {
     document.getElementById("message")
       .scrollIntoView({ behavior: "smooth", block: "nearest" });
     window.scrollBy({ top: 160, behavior: "smooth" });
   }
 
-  /* Growth-based scroll only when hitting bottom */
   function preventBottomCollision() {
     const msg = document.getElementById("message");
     const rect = msg.getBoundingClientRect();
-
     if (rect.bottom > window.innerHeight) {
-      const overflow = rect.bottom - window.innerHeight;
-      window.scrollBy({ top: overflow + 8, behavior: "smooth" });
+      window.scrollBy({ top: rect.bottom - window.innerHeight + 8, behavior: "smooth" });
     }
   }
 
@@ -199,6 +204,7 @@
 
   function yesClicked() {
     if (locked) return;
+    sendAnswer("yes");
 
     if (stage === 0) {
       document.getElementById("message").innerText = "YOUPIE 💕";
@@ -208,7 +214,6 @@
     document.getElementById("message").innerText = "Are u sure 🤨";
     textSize += 6;
     yesScale = Math.max(0.22, yesScale - 0.12);
-
     document.getElementById("message").style.fontSize = textSize + "px";
     document.getElementById("yesBtn").style.transform = `scale(${yesScale})`;
 
@@ -218,6 +223,7 @@
 
   function noClicked() {
     if (locked) return;
+    sendAnswer("no");
 
     if (stage === 0) {
       stage = 1;
@@ -232,7 +238,7 @@
       img3.style.display = "block";
       img3.classList.add("pop-in");
 
-      initialScroll();   // ← BACK, exactly like before
+      initialScroll();
       return;
     }
 
